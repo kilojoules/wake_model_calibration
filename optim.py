@@ -18,7 +18,7 @@ D = 178.3
 dat = dat.assign_coords(x=dat.x * D, y=dat.y * D)
 
 # Define region of interest: x in [0, 10D] and y in [-2D, 2D]
-roi_x = slice(0, 10*D)
+roi_x = slice(2 * D, 10*D)
 roi_y = slice(-2*D, 2*D)
 
 # Subset flow_map to the region of interest
@@ -84,9 +84,20 @@ from sklearn.linear_model import LinearRegression
 reg = LinearRegression()
 reg.fit(X, all_errs)
 plt.scatter(X.dot(reg.coef_), all_errs)
-plt.show()
+plt.savefig('activeSubspace')
+plt.clf()
 
-hello
+best_idx = np.argmin(all_errs)
+
+def_args = {'a_s': a_s[best_idx], 'b_s': b_s[best_idx], 'c_s': c_s[best_idx], 'b_f': b_f[best_idx], 'c_f': c_f[best_idx], 'rotorAvgModel': RotorCenter(), 'groundModel': None}
+
+wfm = All2AllIterative(site, turbine, 
+                   wake_deficitModel=BlondelSuperGaussianDeficit2020(**def_args),
+                   superpositionModel=LinearSum(), deflectionModel=None, 
+                   turbulenceModel=CrespoHernandez(),
+                   blockage_deficitModel=SelfSimilarityDeficit2020(ss_alpha=0.2))
+
+sim_res = wfm([0], [0], ws=[6, 6, 10, 10], TI=[0.1, 0.4, 0.1, 0.4], wd=[270] * 4, time=True)
 
 # Calculate RMSE for each time step
 rmse_values = []
@@ -111,7 +122,6 @@ for t in range(flow_map.time.size):
     plt.tight_layout()
     plt.savefig('figs/err_%i' % t)
     plt.clf()
-    hey
 
 # Overall RMSE (equal weighting across time steps)
 overall_rmse = np.mean(rmse_values)
