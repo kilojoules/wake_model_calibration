@@ -20,7 +20,7 @@ D = 178.3
 dat = dat.assign_coords(x=dat.x * D, y=dat.y * D)
 
 X_LB = 2
-X_UB = 5
+X_UB = 10
 roi_x = slice(X_LB * D, X_UB * D)
 roi_y = slice(-2 * D, 2 * D)
 
@@ -107,9 +107,14 @@ def update_plot(frame):
     ax1.grid(True)
 
     # Use the best parameters so far for the bar plot
-    best_vals = list(best_so_far_params.values())
-    default_vals = list(defaults.values())
     keys = list(best_so_far_params.keys())
+    best_vals = []
+    default_vals = []
+    for key in keys:
+        best_vals.append(best_so_far_params[key])
+        default_vals.append(defaults[key])
+
+
 
     ax2.bar(keys, best_vals, label='Optimized')
     ax2.bar(keys, default_vals, edgecolor='black', linewidth=2, color='none', capstyle='butt', label='Default')
@@ -177,7 +182,7 @@ plt.bar(keys, default_vals,
           linewidth=2,          # Make the line thicker
           color='none',         # Make the bar fill transparent
           capstyle='butt')
-plt.title('Optimal RMSE: %.4f' % overall_rmse)
+plt.title('Optimal RMSE: %.4f' % best_rmse)
 plt.tight_layout()
 plt.savefig('bar_LB_%i_UP_%i' % (X_LB, X_UB))
 plt.clf()
